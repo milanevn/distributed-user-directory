@@ -1,0 +1,19 @@
+services:
+
+  mongo-ag:
+    image: mongo:7
+    container_name: mongo-ag
+    ports:
+      - "27017:27017"
+
+  mongo-hn:
+    image: mongo:7
+    container_name: mongo-hn
+    ports:
+      - "27018:27017"
+
+  mongo-oz:
+    image: mongo:7
+    container_name: mongo-oz
+    ports:
+      - "27019:27017"
