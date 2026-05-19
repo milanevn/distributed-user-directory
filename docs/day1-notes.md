@@ -35,3 +35,17 @@ Spring Boot will act as a shard router and communicate with three MongoDB shard 
 - mongo-ag
 - mongo-hn
 - mongo-oz
+
+## Backend-only Scope Update
+
+The React frontend was created during the initial setup, but the project scope has been changed to backend-only.
+
+The final demo will use:
+
+- Postman or curl
+- Spring Boot APIs
+- MongoDB Compass
+- Docker logs
+- Terminal output
+
+This keeps the project focused on distributed database concepts instead of frontend implementation.
