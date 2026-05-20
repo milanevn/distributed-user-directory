@@ -3,10 +3,13 @@ package com.ddb.userdirectory.service;
 import com.ddb.userdirectory.dto.CreateUserRequest;
 import com.ddb.userdirectory.dto.ShardRoutingResult;
 import com.ddb.userdirectory.dto.UserResponse;
+import com.ddb.userdirectory.dto.UserSearchResponse;
 import com.ddb.userdirectory.model.ShardName;
 import com.ddb.userdirectory.model.User;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -74,6 +77,49 @@ public class UserService {
                 routingResult.getReason()
 
         );
+    }
+
+    public UserSearchResponse searchUserByUsername(String username) {
+
+        ShardRoutingResult routingResult = shardRouterService.routeByUserName(username);
+
+        MongoTemplate targetTemplate = getMongoTemplate(routingResult.getShardName());
+
+        System.out.println(
+                "[Shard Search] Searching "
+                        + username
+                        + " in "
+                        + routingResult.getDatabaseName());
+
+        Query query = new Query();
+
+        query.addCriteria(
+                Criteria.where("username").is(username));
+
+        User user = targetTemplate.findOne(query, User.class);
+
+        if (user == null) {
+
+            return new UserSearchResponse(
+                    null,
+                    username,
+                    null,
+                    null,
+                    routingResult.getShardName().name(),
+                    routingResult.getDatabaseName(),
+                    routingResult.getRange(),
+                    false);
+        }
+
+        return new UserSearchResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getCountry(),
+                routingResult.getShardName().name(),
+                routingResult.getDatabaseName(),
+                routingResult.getRange(),
+                true);
     }
 
 }
