@@ -1,21 +1,21 @@
 # Day 2 Notes
 
-## Goal
+## Mục tiêu
 
-Set up MongoDB shard nodes and connect the Spring Boot backend to each shard.
+Thiết lập các MongoDB shard nodes và kết nối backend Spring Boot tới từng shard.
 
-## Completed Work
+## Công việc đã hoàn thành
 
-- Verified three MongoDB containers are running
-- Added MongoDB shard URIs in application.properties
-- Created User model
-- Created CreateUserRequest DTO
-- Created MongoShardConfig
-- Created three MongoTemplate beans
-- Created TestShardController
-- Tested insert into each shard
-- Verified data in MongoDB Compass
-- Verified shard counts API
+- Kiểm tra ba MongoDB containers đang hoạt động
+- Thêm MongoDB shard URIs vào application.properties
+- Tạo User model
+- Tạo CreateUserRequest DTO
+- Tạo MongoShardConfig
+- Tạo ba MongoTemplate beans
+- Tạo TestShardController
+- Test insert vào từng shard
+- Verify dữ liệu bằng MongoDB Compass
+- Verify API đếm số lượng user trên shard
 
 ## MongoDB Shard Nodes
 
@@ -27,37 +27,37 @@ Set up MongoDB shard nodes and connect the Spring Boot backend to each shard.
 
 ## User Document
 
-Fields:
+Các field hiện tại:
 
 - id
 - username
 - email
 - country
 
-## Current APIs
+## APIs hiện tại
 
 ### Health Check
 
 GET /api/health
 
-### Insert Test User Into AG Shard
+### Insert test user vào AG shard
 
 POST /api/test/shards/ag
 
-### Insert Test User Into HN Shard
+### Insert test user vào HN shard
 
 POST /api/test/shards/hn
 
-### Insert Test User Into OZ Shard
+### Insert test user vào OZ shard
 
 POST /api/test/shards/oz
 
-### Count Users In All Shards
+### Đếm số lượng user trên tất cả shards
 
 GET /api/test/shards/counts
 
-## Current Limitation
+## Giới hạn hiện tại
 
-Routing is still manual through test endpoints.
+Routing vẫn đang thực hiện thủ công thông qua các test endpoints.
 
-Automatic range-based routing will be implemented next.
+Automatic range-based routing sẽ được triển khai ở bước tiếp theo.

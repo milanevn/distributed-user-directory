@@ -41,9 +41,9 @@ public class UserService {
 
         MongoTemplate targetTemplate = getMongoTemplate(routingResult.getShardName());
 
-        System.out.println("[Shard Routing] Routing "
+        System.out.println("[Shard Routing] Đang route "
                 + request.getUsername()
-                + " to "
+                + " tới "
                 + routingResult.getDatabaseName());
 
         User savedUser = targetTemplate.save(user);
@@ -61,7 +61,7 @@ public class UserService {
         if (shardName == ShardName.OZ) {
             return ozMongoTemplage;
         }
-        throw new IllegalArgumentException("Unsupported shard: " + shardName);
+        throw new IllegalArgumentException("Shard không được hỗ trợ: " + shardName);
 
     }
 
@@ -86,9 +86,9 @@ public class UserService {
         MongoTemplate targetTemplate = getMongoTemplate(routingResult.getShardName());
 
         System.out.println(
-                "[Shard Search] Searching "
+                "[Shard Search] Đang tìm user "
                         + username
-                        + " in "
+                        + " trong "
                         + routingResult.getDatabaseName());
 
         Query query = new Query();
@@ -120,6 +120,19 @@ public class UserService {
                 routingResult.getDatabaseName(),
                 routingResult.getRange(),
                 true);
+    }
+
+    public void clearAllUsers() {
+        agMongoTemplage.dropCollection(User.class);
+        hnMongoTemplage.dropCollection(User.class);
+        ozMongoTemplage.dropCollection(User.class);
+
+        System.out.println("[Dataset] Đã xóa toàn bộ user trên tất cả shard");
+    }
+
+    public long countUsersInShard(ShardName shardName) {
+        MongoTemplate mongoTemplate = getMongoTemplate(shardName);
+        return mongoTemplate.getCollection("users").countDocuments();
     }
 
 }

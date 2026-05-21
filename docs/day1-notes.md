@@ -1,51 +1,51 @@
 # Day 1 Notes
 
-## Goal
+## Mục tiêu
 
-Set up the project foundation and architecture.
+Thiết lập nền tảng project và kiến trúc hệ thống.
 
-## Completed Work
+## Công việc đã hoàn thành
 
-- Created local project repository
-- Created GitHub repository
-- Created Spring Boot backend
-- Created React Vite frontend
-- Created Docker Compose file
-- Started three MongoDB containers
-- Created initial project structure
+- Tạo repository local
+- Tạo repository GitHub
+- Tạo backend Spring Boot
+- Tạo frontend React Vite
+- Tạo file Docker Compose
+- Khởi động ba MongoDB containers
+- Tạo cấu trúc project ban đầu
 
-## Distributed Database Concept
+## Khái niệm Distributed Database
 
-A distributed database is logically one database system, but its data is physically distributed across multiple nodes.
+Distributed database là hệ cơ sở dữ liệu được nhìn như một hệ thống logic thống nhất, nhưng dữ liệu thực tế được phân tán trên nhiều node khác nhau.
 
-In this project, the user directory is treated as one logical system, while user data is stored across multiple MongoDB shard nodes.
+Trong project này, hệ thống User Directory được xem như một hệ thống logic duy nhất, trong khi dữ liệu user được lưu trên nhiều MongoDB shard nodes.
 
 ## Horizontal Fragmentation
 
-Horizontal fragmentation means splitting data by rows or documents.
+Horizontal fragmentation là kỹ thuật chia dữ liệu theo hàng hoặc document.
 
-In this project, user documents are distributed based on username ranges.
+Trong project này, user documents được phân bố dựa trên range username.
 
-## Initial Architecture
+## Kiến trúc ban đầu
 
-React Frontend communicates with Spring Boot Backend.
+Frontend React giao tiếp với backend Spring Boot.
 
-Spring Boot will act as a shard router and communicate with three MongoDB shard nodes:
+Spring Boot đóng vai trò shard router và giao tiếp với ba MongoDB shard nodes:
 
 - mongo-ag
 - mongo-hn
 - mongo-oz
 
-## Backend-only Scope Update
+## Điều chỉnh phạm vi project
 
-The React frontend was created during the initial setup, but the project scope has been changed to backend-only.
+Frontend React được tạo trong giai đoạn setup ban đầu, nhưng phạm vi project đã được đổi sang backend-only.
 
-The final demo will use:
+Demo cuối kỳ sẽ sử dụng:
 
-- Postman or curl
+- Postman hoặc curl
 - Spring Boot APIs
 - MongoDB Compass
 - Docker logs
 - Terminal output
 
-This keeps the project focused on distributed database concepts instead of frontend implementation.
+Điều này giúp project tập trung vào kiến thức distributed database thay vì frontend implementation.

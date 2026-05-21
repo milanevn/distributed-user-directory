@@ -18,7 +18,7 @@ public class ShardRouterService {
                     ShardName.AG,
                     "shard_ag",
                     "A-G",
-                    "Username starts with " + firstChar + ", so it belongs to range A-G");
+                    "Username bắt đầu bằng " + firstChar + ", nên thuộc range A-G");
         }
 
         if (firstChar >= 'H' && firstChar <= 'N') {
@@ -26,7 +26,7 @@ public class ShardRouterService {
                     ShardName.HN,
                     "shard_hn",
                     "H-N",
-                    "Username starts with " + firstChar + ", so it belongs to range H-N");
+                    "Username bắt đầu bằng " + firstChar + ", nên thuộc range H-N");
         }
 
         if (firstChar >= 'O' && firstChar <= 'Z') {
@@ -34,15 +34,15 @@ public class ShardRouterService {
                     ShardName.OZ,
                     "shard_oz",
                     "O-Z",
-                    "Username starts with " + firstChar + ", so it belongs to range O-Z");
+                    "Username bắt đầu bằng " + firstChar + ", nên thuộc range O-Z");
         }
 
-        throw new IllegalArgumentException("Username must start with a letter form A to Z");
+        throw new IllegalArgumentException("Username phải bắt đầu bằng chữ cái từ A đến Z");
     }
 
     private void validateUsername(String username) {
         if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username is required");
+            throw new IllegalArgumentException("Username không được để trống");
         }
     }
 }

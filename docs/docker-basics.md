@@ -2,33 +2,33 @@
 
 ## Image
 
-An image is a template used to create containers.
+Image là template dùng để tạo container.
 
-In this project:
+Trong project này:
 
-- mongo:7 is the MongoDB image.
+- mongo:7 là MongoDB image.
 
 ## Container
 
-A container is a running instance of an image.
+Container là instance đang chạy của image.
 
-This project uses three MongoDB containers:
+Project hiện sử dụng ba MongoDB containers:
 
 - mongo-ag
 - mongo-hn
 - mongo-oz
 
-Each container simulates one database shard node.
+Mỗi container mô phỏng một database shard node.
 
 ## Docker Compose
 
-Docker Compose manages multiple containers using a single configuration file.
+Docker Compose dùng để quản lý nhiều containers thông qua một file cấu hình duy nhất.
 
-In this project, docker-compose.yml starts all MongoDB shard nodes with one command:
+Trong project này, docker-compose.yml giúp khởi động toàn bộ MongoDB shard nodes chỉ với một lệnh:
 
 docker compose up -d
 
-## Current Containers
+## Các containers hiện tại
 
 - mongo-ag: localhost:27017
 - mongo-hn: localhost:27018
