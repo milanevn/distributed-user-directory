@@ -14,14 +14,18 @@ public class DatasetGeneratorService {
 
     private final UserService userService;
     private final Random random = new Random();
+    private final ShardMetricsService shardMetricsService;
 
     private static final String[] COUNTRIES = {
             "Vietnam", "USA", "Canada", "Japan", "Korea",
             "Germany", "France", "Australia", "Singapore", "Thailand"
     };
 
-    public DatasetGeneratorService(UserService userService) {
+    public DatasetGeneratorService(
+            UserService userService,
+            ShardMetricsService shardMetricsService) {
         this.userService = userService;
+        this.shardMetricsService = shardMetricsService;
     }
 
     public DatasetGenerationResponse generateUsers(int size, boolean clearedBeforeGenerate) {
@@ -30,6 +34,7 @@ public class DatasetGeneratorService {
 
         if (clearedBeforeGenerate) {
             userService.clearAllUsers();
+            shardMetricsService.resetMetrics();
         }
 
         int skewedCount = (int) Math.round(size * 0.7);

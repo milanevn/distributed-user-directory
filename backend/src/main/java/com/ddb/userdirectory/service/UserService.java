@@ -19,20 +19,24 @@ public class UserService {
     private final MongoTemplate hnMongoTemplage;
     private final MongoTemplate ozMongoTemplage;
     private final ShardRouterService shardRouterService;
+    private final ShardMetricsService shardMetricsService;
 
     public UserService(
             @Qualifier("agMongoTemplate") MongoTemplate agMongoTemplate,
             @Qualifier("hnMongoTemplate") MongoTemplate hnMongoTemplate,
             @Qualifier("ozMongoTemplate") MongoTemplate ozMongoTemplate,
-            ShardRouterService shardRouterService) {
+            ShardRouterService shardRouterService,
+            ShardMetricsService shardMetricsServicer) {
         this.agMongoTemplage = agMongoTemplate;
         this.hnMongoTemplage = hnMongoTemplate;
         this.ozMongoTemplage = ozMongoTemplate;
         this.shardRouterService = shardRouterService;
+        this.shardMetricsService = shardMetricsServicer;
     }
 
     public UserResponse createUser(CreateUserRequest request) {
         ShardRoutingResult routingResult = shardRouterService.routeByUserName(request.getUsername());
+        shardMetricsService.recordInsert(routingResult.getShardName());
 
         User user = new User(
                 request.getUsername(),
@@ -82,6 +86,7 @@ public class UserService {
     public UserSearchResponse searchUserByUsername(String username) {
 
         ShardRoutingResult routingResult = shardRouterService.routeByUserName(username);
+        shardMetricsService.recordSearch(routingResult.getShardName());
 
         MongoTemplate targetTemplate = getMongoTemplate(routingResult.getShardName());
 

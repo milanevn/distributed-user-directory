@@ -1,23 +1,26 @@
 # Day 5 Notes
 
-## Goal
+## Mục tiêu
 
-Generate a skewed dataset based on the project requirement.
+Generate dataset lệch theo đúng yêu cầu đề tài.
 
-## Requirement
+## Yêu cầu dataset
 
-The dataset should contain users where 70% of usernames start with M or S.
+Dataset phải có:
 
-## Completed Work
+- 70% username bắt đầu bằng M hoặc S
+- 30% username bắt đầu bằng các chữ cái khác
 
-- Created DatasetGenerationResponse DTO
-- Added clearAllUsers method in UserService
-- Added countUsersInShard method in UserService
-- Created DatasetGeneratorService
-- Created DatasetController
-- Added POST /api/dataset/generate
-- Tested dataset generation
-- Verified shard distribution
+## Công việc đã hoàn thành
+
+- Tạo DatasetGenerationResponse DTO
+- Thêm clearAllUsers trong UserService
+- Thêm countUsersInShard trong UserService
+- Tạo DatasetGeneratorService
+- Tạo DatasetController
+- Thêm API POST /api/dataset/generate
+- Test generate dataset
+- Verify phân bố dữ liệu bằng MongoDB Compass
 
 ## API
 
@@ -25,10 +28,10 @@ POST /api/dataset/generate?size=10000&clear=true
 
 ## Dataset Distribution Logic
 
-- 70% usernames start with M or S
-- 30% usernames start with other random letters
+- 70% username bắt đầu bằng M hoặc S
+- 30% username bắt đầu bằng random letters khác
 
-## Why M and S Matter
+## Vì sao M và S quan trọng?
 
 Current shard ranges:
 
@@ -36,20 +39,43 @@ Current shard ranges:
 - H-N -> shard_hn
 - O-Z -> shard_oz
 
-M belongs to H-N.
+M thuộc H-N.
 
-S belongs to O-Z.
+S thuộc O-Z.
 
-Therefore, generating many M and S users creates an intentionally skewed distribution.
+Do đó, khi generate nhiều username bắt đầu bằng M và S, dữ liệu sẽ bị lệch về shard_hn và shard_oz.
 
-## Important Implementation Rule
+## Quy tắc implementation quan trọng
 
-The generator does not insert directly into MongoDB.
+Dataset generator không insert trực tiếp vào MongoDB.
 
-It calls UserService.createUser so that the normal shard routing logic is used.
+Generator luôn gọi:
 
-This proves that the routing layer works under larger datasets.
+UserService.createUser(...)
 
-## Meaning
+để dữ liệu vẫn đi qua shard routing logic thật của hệ thống.
 
-This dataset prepares the project for hotspot analysis.
+Điều này chứng minh routing layer vẫn hoạt động đúng khi dataset lớn hơn.
+
+## Distributed Database Concepts
+
+### Data Skew
+
+Data skew xảy ra khi dữ liệu phân bố không đều giữa các shards.
+
+Trong dataset hiện tại:
+
+- shard_hn nhận nhiều username bắt đầu bằng M
+- shard_oz nhận nhiều username bắt đầu bằng S
+
+### Hotspot Preparation
+
+Data skew là nguyên nhân dẫn tới hotspot.
+
+Một số shards sẽ phải xử lý nhiều dữ liệu và requests hơn các shard khác.
+
+Dataset hiện tại được thiết kế để chuẩn bị cho hotspot analysis ở các bước tiếp theo.
+
+### Distributed Dataset Simulation
+
+Dataset generator hiện mô phỏng cách dữ liệu thực tế có thể phân bố lệch trong distributed systems.
