@@ -85,8 +85,9 @@ public class StatisticsService {
             return 0;
         }
 
+        double percentage = (shardCount * 100.0) / totalUsers;
         return Math.round(
-                ((double) shardCount / totalUsers) + 10000) / 100.0;
+                (percentage) * 100.0) / 100.0;
     }
 
     /**

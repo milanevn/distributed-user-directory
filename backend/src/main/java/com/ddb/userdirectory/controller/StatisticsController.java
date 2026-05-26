@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-@RequestMapping("/api/statistics")
+@RequestMapping("/api/shards")
 public class StatisticsController {
 
     private final StatisticsService statisticsService;
@@ -24,7 +24,7 @@ public class StatisticsController {
     /**
      * API phân tích phân bố dữ liệu trên cluster.
      */
-    @GetMapping("/shards")
+    @GetMapping("/stats")
     public ClusterStatisticsResponse getShardStatistics() {
         return statisticsService.getClusterStatistics();
     }

@@ -17,8 +17,8 @@ public class DatasetController {
     @PostMapping("/generate")
     public DatasetGenerationResponse generateDataset(
             @RequestParam(defaultValue = "10000") int size,
-            @RequestParam(defaultValue = "true") boolean clear) {
-        return datasetGeneratorService.generateUsers(size, clear);
+            @RequestParam(name = "clearOldData", defaultValue = "true") boolean clearOldData) {
+        return datasetGeneratorService.generateUsers(size, clearOldData);
     }
 
 }
