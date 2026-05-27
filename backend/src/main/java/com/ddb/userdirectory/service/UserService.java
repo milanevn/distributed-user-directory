@@ -4,6 +4,7 @@ import com.ddb.userdirectory.dto.CreateUserRequest;
 import com.ddb.userdirectory.dto.ShardRoutingResult;
 import com.ddb.userdirectory.dto.UserResponse;
 import com.ddb.userdirectory.dto.UserSearchResponse;
+import com.ddb.userdirectory.exception.ShardUnavailableException;
 import com.ddb.userdirectory.model.ShardName;
 import com.ddb.userdirectory.model.User;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,9 +51,13 @@ public class UserService {
                 + " tới "
                 + routingResult.getDatabaseName());
 
-        User savedUser = targetTemplate.save(user);
+        try {
+            User savedUser = targetTemplate.save(user);
+            return toResponse(savedUser, routingResult);
+        } catch (Exception ex) {
+            throw new ShardUnavailableException("Shard " + routingResult.getShardName().name() + " unavailable");
+        }
 
-        return toResponse(savedUser, routingResult);
     }
 
     private MongoTemplate getMongoTemplate(ShardName shardName) {
@@ -101,7 +106,13 @@ public class UserService {
         query.addCriteria(
                 Criteria.where("username").is(username));
 
-        User user = targetTemplate.findOne(query, User.class);
+        User user;
+
+        try {
+            user = targetTemplate.findOne(query, User.class);
+        } catch (Exception ex) {
+            throw new ShardUnavailableException("Shard " + routingResult.getShardName().name() + " unavailable");
+        }
 
         if (user == null) {
 
@@ -128,16 +139,27 @@ public class UserService {
     }
 
     public void clearAllUsers() {
-        agMongoTemplage.dropCollection(User.class);
-        hnMongoTemplage.dropCollection(User.class);
-        ozMongoTemplage.dropCollection(User.class);
+        try {
+            agMongoTemplage.dropCollection(User.class);
+            hnMongoTemplage.dropCollection(User.class);
+            ozMongoTemplage.dropCollection(User.class);
+        } catch (Exception ex) {
+            throw new ShardUnavailableException("Một hoặc nhiều shard đang unvailable khi clear data");
+        }
 
         System.out.println("[Dataset] Đã xóa toàn bộ user trên tất cả shard");
     }
 
     public long countUsersInShard(ShardName shardName) {
         MongoTemplate mongoTemplate = getMongoTemplate(shardName);
-        return mongoTemplate.getCollection("users").countDocuments();
+
+        try {
+            return mongoTemplate.getCollection("users").countDocuments();
+        } catch (Exception ex) {
+            throw new ShardUnavailableException(
+                    "Shard " + shardName.name() + " unavailable");
+        }
+
     }
 
 }
