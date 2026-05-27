@@ -1,36 +1,183 @@
-# Day 10 Notes
+# Day 11 Notes
 
 ## Mục tiêu
 
-Mô phỏng shard/node failure và kiểm tra khả năng chịu lỗi của hệ thống distributed database.
+Đóng gói backend Spring Boot vào Docker và chạy toàn bộ hệ thống distributed database bằng Docker Compose.
 
 ## Công việc đã hoàn thành
 
-- Tạo ShardHealthStatus DTO
-- Tạo ClusterHealthResponse DTO
-- Tạo ErrorResponse DTO
-- Tạo ShardUnavailableException
-- Tạo GlobalExceptionHandler
-- Tạo ShardHealthService
-- Tạo ShardHealthController
-- Thêm API GET /api/shards/health
-- Thêm MongoDB health check bằng ping command
-- Thêm MongoDB timeout configuration
-- Thêm failure handling trong UserService
-- Test shard failure bằng docker stop
-- Test shard recovery bằng docker start
+- Tạo Dockerfile cho backend
+- Tạo .dockerignore cho backend
+- Tạo application-docker.properties
+- Cập nhật docker-compose.yml
+- Thêm backend service vào Docker Compose
+- Cấu hình Spring profile docker
+- Backend trong Docker connect tới MongoDB bằng service name
+- Test docker compose up --build
+- Verify backend health API
+- Verify shard health API
+- Verify dataset generation
+- Verify shard statistics
+- Test shard failure sau khi dockerized
 
-## APIs
+## Kiến trúc sau Day 11
 
-### Kiểm tra trạng thái cluster
+Hệ thống hiện gồm:
+
+- ddb-backend container
+- mongo-ag container
+- mongo-hn container
+- mongo-oz container
+
+Backend Spring Boot đóng vai trò shard router và middleware.
+
+Ba MongoDB containers đóng vai trò distributed shard nodes.
+
+## Docker Concepts
+
+### Docker Image
+
+Image là template hoặc blueprint dùng để tạo container.
+
+Ví dụ trong project:
+
+- mongo:7 image
+- backend image build từ Dockerfile
+
+### Docker Container
+
+Container là instance đang chạy của image.
+
+Ví dụ:
+
+- mongo-ag
+- mongo-hn
+- mongo-oz
+- ddb-backend
+
+Ba MongoDB containers đều được tạo từ cùng một MongoDB image.
+
+### Dockerfile
+
+Dockerfile là file mô tả cách build backend image.
+
+Project sử dụng:
+
+- Java 17
+- Maven Wrapper (mvnw)
+- multi-stage build
+
+### Docker Compose
+
+Docker Compose giúp chạy toàn bộ hệ thống bằng một lệnh:
+
+```bash
+docker compose up --build
+```
+
+Compose sẽ:
+
+- build backend image
+- tạo backend container
+- tạo MongoDB containers
+- tạo Docker network
+- start toàn bộ services
+
+## Vì sao cần application-docker.properties?
+
+Khi backend chạy local bằng IntelliJ:
+
+```text
+mongodb://localhost:27017
+```
+
+hoạt động bình thường.
+
+Nhưng khi backend chạy trong Docker container:
+
+```text
+localhost
+```
+
+là chính container backend.
+
+Vì vậy backend phải connect bằng Docker service name:
+
+```text
+mongodb://mongo-ag:27017
+mongodb://mongo-hn:27017
+mongodb://mongo-oz:27017
+```
+
+## Docker Commands
+
+### Build và start toàn bộ hệ thống
+
+```bash
+docker compose up --build
+```
+
+### Chạy background mode
+
+```bash
+docker compose up --build -d
+```
+
+### Stop và remove toàn bộ containers
+
+```bash
+docker compose down
+```
+
+### Xem containers đang chạy
+
+```bash
+docker ps
+```
+
+### Stop một shard để test failure
+
+```bash
+docker stop mongo-oz
+```
+
+### Start lại shard
+
+```bash
+docker start mongo-oz
+```
+
+## APIs kiểm thử
+
+### Backend health
+
+GET /api/health
+
+### Cluster health
 
 GET /api/shards/health
 
-## Failure Simulation Flow
+### Generate dataset
 
-### Bước 1
+POST /api/dataset/generate?size=10000&clearOldData=true
 
-Kiểm tra cluster ban đầu:
+### Shard statistics
+
+GET /api/shards/stats
+
+## Kiểm thử
+
+### Test backend trong Docker
+
+Sau khi chạy:
+
+```bash
+docker compose up --build
+```
+
+backend container hoạt động bình thường và expose port 8080.
+
+### Test cluster health
 
 GET /api/shards/health
 
@@ -41,7 +188,15 @@ Expected:
 - OZ = UP
 - clusterHealthy = true
 
-## Bước 2
+### Test generate dataset
+
+Generate 10000 skewed users thành công.
+
+### Test hotspot analysis
+
+Shard HN và OZ tiếp tục nhận lượng data lớn hơn AG.
+
+### Test failure handling
 
 Stop shard OZ:
 
@@ -49,148 +204,58 @@ Stop shard OZ:
 docker stop mongo-oz
 ```
 
-## Bước 3
-
-Kiểm tra lại cluster health:
-
-GET /api/shards/health
-
 Expected:
 
-- AG = UP
-- HN = UP
 - OZ = DOWN
 - clusterHealthy = false
 
-## Bước 4
-
-Test partial failure:
-
-GET /api/users/SUser00001
-
-Vì username bắt đầu bằng S nên request sẽ được route tới shard OZ.
-
-Khi OZ DOWN:
-
-- backend không crash toàn bộ
-- request fail đúng shard liên quan
-- hệ thống trả lỗi rõ ràng
-
-Expected:
-
-```json
-{
-  "status": 503,
-  "error": "Service Unavailable",
-  "message": "Shard OZ unavailable"
-}
-```
-
-## Bước 5
-
-Recovery shard:
+Recovery:
 
 ```bash
 docker start mongo-oz
 ```
 
-## Bước 6
-
-Kiểm tra lại cluster health:
-
-GET /api/shards/health
-
 Expected:
 
-- AG = UP
-- HN = UP
-- OZ = UP
 - clusterHealthy = true
-
-## MongoDB Health Check
-
-Project sử dụng:
-
-```java
-runCommand(new Document("ping", 1))
-```
-
-để kiểm tra trạng thái hoạt động của từng MongoDB shard.
-
-Nếu shard phản hồi:
-
-- status = UP
-
-Nếu shard không phản hồi:
-
-- status = DOWN
-
-## Failure Handling Logic
-
-Khi shard unavailable:
-
-- MongoDB driver throw exception
-- UserService catch exception
-- throw ShardUnavailableException
-- GlobalExceptionHandler trả response lỗi chuẩn
-
-Điều này giúp backend không crash toàn bộ khi một shard bị lỗi.
 
 ## Distributed Database Concepts
 
-### Distributed Node Failure
+### Distributed Nodes
 
-Trong distributed systems, node/database có thể bị stop hoặc mất kết nối bất cứ lúc nào.
+Mỗi MongoDB container đại diện cho một shard node trong distributed database.
 
-Project mô phỏng điều này bằng:
+### Middleware
 
-```bash
-docker stop mongo-oz
-```
+Backend Spring Boot đóng vai trò middleware để route request tới đúng shard.
 
-### Failure Detection
+### Service Isolation
 
-System hiện có khả năng phát hiện shard nào đang DOWN thông qua health check API.
+Mỗi thành phần của hệ thống chạy trong container riêng biệt.
 
-### Partial Failure
+### Deployment Environment
 
-OZ có thể DOWN trong khi AG và HN vẫn hoạt động.
+Docker Compose giúp tái tạo distributed environment ổn định và dễ demo hơn.
 
-Đây là đặc trưng của distributed systems.
+### Containerized Distributed System
 
-### Fault Tolerance
+Project hiện đã được containerized hoàn toàn:
 
-Backend không crash toàn bộ khi một shard lỗi.
+- backend container
+- distributed MongoDB shard containers
 
-### Graceful Degradation
-
-Chỉ các request liên quan tới shard lỗi mới bị ảnh hưởng.
-
-Các shard còn lại vẫn usable.
-
-### Recovery
-
-Sau khi shard hoạt động lại:
-
-```bash
-docker start mongo-oz
-```
-
-cluster có thể recover và tiếp tục hoạt động bình thường.
+Điều này giúp project gần hơn với deployment environment thực tế.
 
 ## Ý nghĩa
 
-Day 10 giúp project không chỉ hỗ trợ:
+Day 11 giúp project chuyển từ:
 
-- sharding
-- routing
-- hotspot analysis
-- re-sharding simulation
+- chạy local bằng IDE
 
-mà còn hỗ trợ:
+sang:
 
-- node failure detection
-- partial failure handling
-- cluster recovery
+- chạy bằng Docker Compose
+- containerized backend
+- distributed deployment environment
 
-Điều này giúp hệ thống gần hơn với distributed database behavior thực tế.
+Đây là bước quan trọng trước khi hoàn thiện proposal, analysis report và final demo.

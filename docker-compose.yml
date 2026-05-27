@@ -1,19 +1,43 @@
 services:
-
   mongo-ag:
     image: mongo:7
     container_name: mongo-ag
     ports:
       - "27017:27017"
+    volumes:
+      - mongo-ag-data:/data/db
 
   mongo-hn:
     image: mongo:7
     container_name: mongo-hn
     ports:
       - "27018:27017"
+    volumes:
+      - mongo-hn-data:/data/db
 
   mongo-oz:
     image: mongo:7
     container_name: mongo-oz
     ports:
       - "27019:27017"
+    volumes:
+      - mongo-oz-data:/data/db
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ddb-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - mongo-ag
+      - mongo-hn
+      - mongo-oz
+
+volumes:
+  mongo-ag-data:
+  mongo-hn-data:
+  mongo-oz-data:
