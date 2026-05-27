@@ -1,69 +1,226 @@
-# Distributed User Directory
+# Distributed User Directory System
 
-Backend-only final project for Distributed Database Systems.
-
-## Topic
-
-Global User Directory using range-based sharding.
-
-## Project Idea
-
-This project simulates a distributed database system where user data is horizontally fragmented across multiple MongoDB shard nodes.
-
-The Spring Boot backend acts as the routing layer. It decides which shard should store or query a user based on the first letter of the username.
-
-## Core Architecture
-
-Client tools:
-
-- Postman
-- curl
-- browser for GET APIs
-- MongoDB Compass for data inspection
-
-Backend:
+Distributed database prototype sử dụng:
 
 - Spring Boot
+- MongoDB
+- Range-based sharding
+- Docker Compose
 
-Database nodes:
+Project mô phỏng:
 
+- shard routing
+- hotspot detection
+- re-sharding simulation
+- distributed node failure
+- cluster recovery
+
+---
+
+# System Architecture
+
+Hệ thống gồm:
+
+- ddb-backend
 - mongo-ag
 - mongo-hn
 - mongo-oz
 
-## Initial Shard Ranges
+Backend Spring Boot đóng vai trò shard router và middleware.
 
-- A-G: shard_ag
-- H-N: shard_hn
-- O-Z: shard_oz
+MongoDB được chia thành nhiều shards theo username ranges.
 
-## Tech Stack
+---
 
-- Java 17
-- Spring Boot
-- MongoDB
-- Docker Compose
-- Postman or curl
+# Shard Ranges
 
-## Core Concepts
+| Shard | Username Range |
+| ----- | -------------- |
+| AG    | A-G            |
+| HN    | H-N            |
+| OZ    | O-Z            |
 
-- Distributed database
-- Horizontal fragmentation
-- Range-based sharding
-- Data localization
-- Data skew
-- Hotspot detection
-- Re-sharding
-- Failure handling
+---
 
-## Current Status
+# Technologies
 
-- Backend initialized
-- Docker Compose configured
-- Three MongoDB containers running as shard nodes
-- Backend connected to all MongoDB shards
-- Manual test APIs can insert data into each shard
+| Thành phần       | Công nghệ     |
+| ---------------- | ------------- |
+| Backend          | Spring Boot   |
+| Database         | MongoDB       |
+| Containerization | Docker        |
+| Build Tool       | Maven Wrapper |
+| API Testing      | Postman       |
 
-## Note
+---
 
-A React frontend was initially created, but it is not part of the core demo anymore. The project will be demonstrated using backend APIs, Postman/curl, terminal logs, and MongoDB Compass.
+# Prerequisites
+
+Cần cài đặt:
+
+- Docker Desktop
+- Git
+- Java 17 (optional nếu chỉ chạy Docker)
+
+---
+
+# Setup Guide
+
+## Clone project
+
+```bash
+git clone <repo-url>
+```
+
+---
+
+## Start toàn bộ hệ thống
+
+Từ root project:
+
+```bash
+docker compose up --build
+```
+
+Hoặc chạy background:
+
+```bash
+docker compose up --build -d
+```
+
+Docker Compose sẽ:
+
+- build backend image
+- tạo backend container
+- tạo MongoDB shard containers
+- start toàn bộ distributed system
+
+---
+
+## Stop toàn bộ hệ thống
+
+```bash
+docker compose down
+```
+
+---
+
+## Verify containers
+
+```bash
+docker ps
+```
+
+Expected:
+
+- ddb-backend
+- mongo-ag
+- mongo-hn
+- mongo-oz
+
+---
+
+# APIs
+
+## Backend Health
+
+```http
+GET /api/health
+```
+
+---
+
+## Cluster Health
+
+```http
+GET /api/shards/health
+```
+
+---
+
+## Generate Dataset
+
+```http
+POST /api/dataset/generate?size=10000&clearOldData=true
+```
+
+---
+
+## Cluster Statistics
+
+```http
+GET /api/shards/stats
+```
+
+---
+
+## Hotspot Analysis
+
+```http
+GET /api/shards/hotspots
+```
+
+---
+
+## Re-sharding Plan
+
+```http
+GET /api/resharding-plan
+```
+
+---
+
+## Re-sharding Simulation
+
+```http
+POST /api/resharding/simulate
+```
+
+---
+
+# Failure Simulation
+
+## Stop shard OZ
+
+```bash
+docker stop mongo-oz
+```
+
+## Verify cluster health
+
+```http
+GET /api/shards/health
+```
+
+Expected:
+
+- OZ = DOWN
+- clusterHealthy = false
+
+## Recovery shard
+
+```bash
+docker start mongo-oz
+```
+
+---
+
+# Distributed Database Concepts
+
+Project mapping:
+
+- horizontal fragmentation
+- range-based sharding
+- data localization
+- hotspot detection
+- re-sharding
+- scale-out
+- distributed node failure
+- fault tolerance
+- recovery
+
+---
+
+# Author
+
+Distributed Database Final Project
